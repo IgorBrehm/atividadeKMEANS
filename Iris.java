@@ -28,4 +28,8 @@ public class Iris {
     public double getCompSepal(){
         return this.comprimento_Sepalas;
     }
+    
+    public String getTipo(){
+        return this.tipo;
+    }
 }
