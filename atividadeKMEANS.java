@@ -16,6 +16,7 @@ public class atividadeKMEANS {
         Scanner in = new Scanner(file);
         ArrayList<Iris> list = new ArrayList<Iris>();
         ArrayList<Centroid> centroids = new ArrayList<Centroid>();
+        ArrayList<Centroid> copy = new ArrayList<Centroid>();
 
         //populando a lista da populacao de Iris
         while(in.hasNextLine()){
@@ -37,16 +38,17 @@ public class atividadeKMEANS {
         Random r = new Random();
         for(int i = 0; i < k; i++){
             int aux = r.nextInt(list.size());
-            Centroid it = new Centroid(list.get(aux).getLargPetal(),list.get(aux).getCompPetal(),list.get(aux).getLargSepal(),list.get(aux).getCompSepal());
-            centroids.add(it);
-            it.list.add(list.get(aux));
+            Centroid it1 = new Centroid(list.get(aux).getLargPetal(),list.get(aux).getCompPetal(),list.get(aux).getLargSepal(),list.get(aux).getCompSepal());
+            Centroid it2 = new Centroid(list.get(aux).getLargPetal(),list.get(aux).getCompPetal(),list.get(aux).getLargSepal(),list.get(aux).getCompSepal());
+            centroids.add(it1);
+            copy.add(it2);
         }
         
         boolean acabou = false;
         while(true){
             for(int j = 0; j < list.size(); j++){ //iteracao pela lista de Iris
                 Iris iris = list.get(j);
-                Centroid closest = new Centroid(0.0,0.0,0.0,0.0);
+                int closest = -1;
                 double bestDist = -1.0;
                 
                 for(int i = 0; i < k; i++){ //descobrindo centroide mais proximo
@@ -54,47 +56,51 @@ public class atividadeKMEANS {
                     double dist = Math.sqrt((Math.pow(centroid.getLargPetal() - iris.getLargPetal(), 2)) + (Math.pow(centroid.getCompPetal() - iris.getCompPetal(), 2)) + (Math.pow(centroid.getLargSepal() - iris.getLargSepal(), 2)) + (Math.pow(centroid.getCompSepal() - iris.getCompSepal(), 2)));
                     if(dist < bestDist || (bestDist < 0)){
                         bestDist = dist;
-                        closest = centroid;
+                        closest = i;
                     }
                 }
-                closest.list.add(iris);
-                double oldLP = closest.getLargPetal();
-                double oldCP = closest.getCompPetal();
-                double oldLS = closest.getLargSepal();
-                double oldCS = closest.getCompSepal();
+                centroids.get(closest).list.add(iris);
                 double sumLP = 0.0;
                 double sumCP = 0.0;
                 double sumLS = 0.0;
                 double sumCS = 0.0;
-                for(int i = 0; i < closest.list.size(); i++){ //soma todos os itens do cluster atual
-                    sumLP = sumLP + closest.list.get(i).getLargPetal();
-                    sumCP = sumCP + closest.list.get(i).getCompPetal();
-                    sumLS = sumLS + closest.list.get(i).getLargSepal();
-                    sumCS = sumCS + closest.list.get(i).getCompSepal();
+                for(int i = 0; i < centroids.get(closest).list.size(); i++){ //soma todos os itens do cluster atual
+                    sumLP = sumLP + centroids.get(closest).list.get(i).getLargPetal();
+                    sumCP = sumCP + centroids.get(closest).list.get(i).getCompPetal();
+                    sumLS = sumLS + centroids.get(closest).list.get(i).getLargSepal();
+                    sumCS = sumCS + centroids.get(closest).list.get(i).getCompSepal();
                 }
-                closest.setLargPetal(sumLP/ closest.list.size()); //atualiza os valores
-                closest.setCompPetal(sumCP/ closest.list.size());
-                closest.setLargSepal(sumLS/ closest.list.size());
-                closest.setCompSepal(sumCS/ closest.list.size());
-                
-                if((oldLP == closest.getLargPetal()) && (oldCP == closest.getCompPetal()) && (oldLS == closest.getLargSepal()) && (oldCS == closest.getCompSepal())){
-                    closest.setStatus(true);
-                }
+                centroids.get(closest).setLargPetal(sumLP/ centroids.get(closest).list.size()); //atualiza os valores
+                centroids.get(closest).setCompPetal(sumCP/ centroids.get(closest).list.size());
+                centroids.get(closest).setLargSepal(sumLS/ centroids.get(closest).list.size());
+                centroids.get(closest).setCompSepal(sumCS/ centroids.get(closest).list.size());
             }
+            
             for(int i = 0; i < centroids.size(); i++){ //verifica se os centroides nao mudaram
-                if(centroids.get(i).isDone() == false){
-                    acabou = false;
+                if(copy.get(i).getLargPetal() == centroids.get(i).getLargPetal()){
+                    if(copy.get(i).getCompPetal() == centroids.get(i).getCompPetal()){
+                        if(copy.get(i).getLargSepal() == centroids.get(i).getLargSepal()){
+                            if(copy.get(i).getCompSepal() == centroids.get(i).getCompSepal()){
+                                acabou = true;
+                            }
+                        }
+                    }
                 }
                 else{
-                    acabou = true;
+                    acabou = false;
                 }
             }
             if(acabou == true){
                 break;
             }
             for(int i = 0; i < centroids.size(); i++){ //limpa a lista de itens dos centroides para nova iteracao
+                copy.get(i).setLargPetal(centroids.get(i).getLargPetal());
+                copy.get(i).setCompPetal(centroids.get(i).getCompPetal());
+                copy.get(i).setLargSepal(centroids.get(i).getLargSepal());
+                copy.get(i).setCompSepal(centroids.get(i).getCompSepal());
                 centroids.get(i).list.clear();
             }
+            System.out.println("LIST OF CENTROIDS:");
             for(int i = 0; i < centroids.size(); i++){
                 System.out.println("-----------------------------");
                 System.out.println(centroids.get(i).getLargPetal());
@@ -103,6 +109,7 @@ public class atividadeKMEANS {
                 System.out.println(centroids.get(i).getCompSepal());
                 System.out.println("-----------------------------");
             }
+            System.out.println("   ");
         }
     }
 }
